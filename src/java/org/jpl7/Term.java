@@ -45,7 +45,7 @@ import org.jpl7.fli.term_t;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * <hr>
  *
- * @author Fred Dushin <fadushin@syr.edu>
+ * @author Fred Dushin fadushin@syr.edu
  * @version $Revision$
  */
 public abstract class Term {
@@ -60,10 +60,10 @@ public abstract class Term {
 	 * returns the i-th (1+) argument of a Term;
 	 *
 	 * defined only for Compound
-	 *
+     *
+	 * @param i the index of argument to return
 	 * @return the i-th argument of a (Compound) Term
-	 * @throws JPLException
-	 *             if Term is not a Compound
+	 * @throws JPLException if Term is not a Compound
 	 */
 	public Term arg(int i) { // overridden in Compound
 		throw new JPLException("arg(int) is undefined for " + this.typeName() + " instances");
@@ -505,6 +505,7 @@ public abstract class Term {
 	 * @return the Object which this JRef references
 	 * @deprecated Use {@link JRef#object()}
 	 */
+	@Deprecated
 	public Object jrefToObject() { // overridden in Compound and JRef
 		throw new JPLException("term is neither a JRef nor a Compound representing @(null)");
 	}
@@ -516,6 +517,7 @@ public abstract class Term {
 	 * @return the length (as an int) of this list, iff it is one.
 	 * @deprecated Use {@link Util#listToLength(Term)}
 	 */
+    @Deprecated
 	public final int listLength() {
 		if (this.isListPair()) { // was .hasFunctor(".", 2)
 			return 1 + this.arg(2).listLength(); // TODO eliminate recursion
@@ -562,11 +564,15 @@ public abstract class Term {
 	}
 
 	/**
+     * Returns the JREF term for an object
+     *
+     * @param object object of interest
 	 * @return a new JRef which references object, or @(null) if object == null.
 	 * @throws JPLException
 	 *             if object is a String.
 	 * @deprecated Use {@link JPL#newJRef}
 	 */
+    @Deprecated
 	public static final Term objectToJRef(Object object) {
 		if (object == null) {
 			return JPL.JNULL;
@@ -711,6 +717,7 @@ public abstract class Term {
 	 *             if this Term is not a JRef
 	 * @deprecated Use {@link JRef#object()}
 	 */
+    @Deprecated
 	public Object ref() { // overridden in JRef
 		throw new JPLException("this Term is not a JRef");
 	}

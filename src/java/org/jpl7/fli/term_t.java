@@ -34,7 +34,7 @@ package org.jpl7.fli;
  * POSSIBILITY OF SUCH DAMAGE.
  * <hr>
  * 
- * @author Fred Dushin <fadushin@syr.edu>
+ * @author Fred Dushin fadushin@syr.edu
  * @version $Revision$
  */
 public class term_t extends LongHolder {
@@ -53,6 +53,7 @@ public class term_t extends LongHolder {
 	 *            the number of consecutive term_ts
 	 * @param term0
 	 *            a term_t whose value is the 0th term_t.
+	 * @return string representation of the term
 	 */
 	public static String toString(int n, term_t term0) {
 		String s = "";

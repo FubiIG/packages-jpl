@@ -35,7 +35,7 @@ import org.jpl7.fli.term_t;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * <hr>
  *
- * @author Fred Dushin <fadushin@syr.edu>
+ * @author Fred Dushin fadushin@syr.edu
  * @version $Revision$
  */
 public final class Util {
@@ -114,11 +114,11 @@ public final class Util {
 
 	/**
 	 * Converts a Prolog source text to a corresponding JPL Term (in which each Variable has the appropriate name from
-	 * the source text). Throws PrologException containing error(syntax_error(_),_) if text is invalid.
+	 * the source text).
 	 *
-	 * @param text
-	 *            A Prolog source text denoting a term
+	 * @param text A Prolog source text denoting a term
 	 * @return Term a JPL Term equivalent to the given source text
+	 * @throws PrologException containing error(syntax_error(_),_) if text is invalid as a term.
 	 */
 	public static Term textToTerm(String text) {
 		// it might be better to use PL_chars_to_term()
@@ -142,6 +142,7 @@ public final class Util {
 	 * Throws PrologException containing error(syntax_error(_),_) if text is invalid.
 	 *
 	 * @param text A Prolog source text denoting a term
+	 * @param params parameters to be injected in each ?
 	 * @return Term a JPL Term equivalent to the given source text
 	 */
 	public static Term textParamsToTerm(String text, Term[] params) {
@@ -220,6 +221,7 @@ public final class Util {
 	/**
 	 * converts a proper list to an array of terms, else throws an exception
 	 *
+	 * @param t  a list term
 	 * @throws JPLException if the term passed is not itself a Prolog list term
 	 * @return an array of terms whose successive elements are the corresponding members of the list (if it is a list)
 	 */
