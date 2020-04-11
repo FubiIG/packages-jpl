@@ -82,9 +82,12 @@
         jpl_map_element/2,
         jpl_set_element/2
     ]).
-:- use_module(library(lists)).
-:- use_module(library(apply)).
-:- use_module(library(debug)).
+:- autoload(library(apply),[maplist/2]).
+:- autoload(library(debug),[debugging/1,debug/3]).
+:- autoload(library(filesex),[directory_file_path/3]).
+:- autoload(library(lists),
+	    [member/2,nth0/3,nth1/3,append/3,flatten/2,select/3]).
+:- autoload(library(shlib),[load_foreign_library/1]).
 
 /** <module> A Java interface for SWI Prolog 7.x
 
@@ -4120,14 +4123,19 @@ add_jpl_to_classpath :-
 
 %!  libjpl(-Spec) is det.
 %
-%   Return the spec for loading the   JPL shared object. This shared
-%   object must be called libjpl.so as the Java System.loadLibrary()
+%   Return the spec for  loading  the   JPL  shared  object. This shared
+%   object must be called  libjpl.so   as  the Java System.loadLibrary()
 %   call used by jpl.jar adds the lib* prefix.
+%
+%   In Windows we should __not__  use   foreign(jpl)  as this eventually
+%   calls LoadLibrary() with an absolute path, disabling the Windows DLL
+%   search process for the dependent `jvm.dll`   and possibly other Java
+%   dll dependencies.
 
 libjpl(File) :-
     (   current_prolog_flag(unix, true)
     ->  File = foreign(libjpl)
-    ;   File = foreign(jpl)
+    ;   File = foreign(jpl)                                    % Windows
     ).
 
 %!  add_jpl_to_ldpath(+JPL) is det.
@@ -4242,14 +4250,20 @@ java_dir(_, _) --> [].
 %
 %   Find the home location of Java.
 %
-%   @param Home    JAVA home in OS notation
+%   @arg Home    JAVA home in OS notation
 
 java_home_win_key(
-    jre,
-    'HKEY_LOCAL_MACHINE/Software/JavaSoft/Java Runtime Environment').
+    jdk,
+    'HKEY_LOCAL_MACHINE/Software/JavaSoft/JDK'). % new style
 java_home_win_key(
     jdk,
     'HKEY_LOCAL_MACHINE/Software/JavaSoft/Java Development Kit').
+java_home_win_key(
+    jre,
+    'HKEY_LOCAL_MACHINE/Software/JavaSoft/JRE').
+java_home_win_key(
+    jre,
+    'HKEY_LOCAL_MACHINE/Software/JavaSoft/Java Runtime Environment').
 
 java_home(Home) :-
     getenv('JAVA_HOME', Home),

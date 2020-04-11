@@ -2,7 +2,7 @@
 
 To use JPL, three libraries need to be deployed:
 
- * Native library `jpl.dll/libjpl.so/libjpl.dylib` implementing the interface between Java and C code. It must be found by the Windows/Linux/MacOS kernel.
+ * Native library `jpl.dll/libjpl.so/libjpl.dylib` (for Windows/Linux/MacOS respectively) implementing the interface between Java and C code. It must be found by the Windows/Linux/MacOS kernel.
     * In Windows, it can go in any folder on your `PATH`; perhaps `%SWI_HOME_DIR%\bin` or your Windows' system folder.
     * In Linux, it is generally  found in `/usr/lib/swi-prolog/lib/amd64/libjpl.so`
     * In MacOS, it can install in `/usr/local/lib/swipl-7.7.19/lib/x86_64-darwin17.7.0/libjpl.dylib`
