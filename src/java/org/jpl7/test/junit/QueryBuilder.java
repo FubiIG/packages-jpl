@@ -1,48 +1,57 @@
-package org.jpl7.test.standalone;
+package org.jpl7.test.junit;
 
 import org.jpl7.*;
 import org.jpl7.Float;
 import org.jpl7.Integer;
+import org.jpl7.fli.Prolog;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import static org.junit.Assert.*;
 
-public class QueryBuilder {
-//    final Logger logger = LoggerFactory.getLogger(GetSolution.class);
+public class QueryBuilder extends JPLTest {
 
-	public static void main(String argv[]) {
+    public static void main(String argv[]) {
+        // To be able to call it from CLI without IDE (e.g., by CMAKE)
+        org.junit.runner.JUnitCore.main("org.jpl7.test.junit.QueryBuilder");
+
+        // should work from static class but gives error
+//        org.junit.runner.JUnitCore.main( GetSolution.class.getName()); // full name with package
     }
 
-    @Before
-    public void setUp() {
-        // JPL.setTraditional();
-        //
-//		Query.hasSolution("use_module(library(jpl))"); // only because we call e.g. jpl_pl_syntax/1 below
-//		Term swi = Query.oneSolution("current_prolog_flag(version_data,Swi)").get("Swi");
-//		System.out.println("swipl.version = " + swi.arg(1) + "." + swi.arg(2) + "." + swi.arg(3));
-//		System.out.println("swipl.syntax = " + Query.oneSolution("jpl_pl_syntax(Syntax)").get("Syntax"));
-//		System.out.println("swipl.home = " + Query.oneSolution("current_prolog_flag(home,Home)").get("Home").name());
-//		System.out.println("jpl.jar = " + JPL.version_string());
-//		System.out.println("jpl.dll = " + org.jpl7.fli.Prolog.get_c_lib_version());
-//		System.out.println("jpl.pl = " + Query.oneSolution("jpl_pl_lib_version(V)").get("V").name());
+    /**
+     * This is done at the class loading, before any test is run
+     */
+    @BeforeClass
+    public static void setUp() {
+        setUpClass();
     }
+
 
     @Rule
     public TestRule watcher = new TestWatcher() {
         protected void starting(Description description) {
-//            logger.info("{} being run...", description.getMethodName());
-
-            System.out.println("Starting test: " + description.getMethodName());
+            reportTest(description);
         }
     };
+
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // SUPPORTING CODE
+    ///////////////////////////////////////////////////////////////////////////////
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // TESTS
+    ///////////////////////////////////////////////////////////////////////////////
 
     @Test
     public void testTerm1() {

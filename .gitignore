@@ -46,3 +46,6 @@ src/java/.project
 target
 .idea
 packages-jpl.iml
+*.iml
+/out
+SWIJPL-development.md

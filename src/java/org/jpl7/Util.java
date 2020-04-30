@@ -119,19 +119,11 @@ public final class Util {
 	 * @param text A Prolog source text denoting a term
 	 * @return Term a JPL Term equivalent to the given source text
 	 * @throws PrologException containing error(syntax_error(_),_) if text is invalid as a term.
+	 * @deprecated Use org.jpl7.Term.textToTerm(String text)
 	 */
+	@Deprecated
 	public static Term textToTerm(String text) {
-		// it might be better to use PL_chars_to_term()
-		Query q = new Query(new Compound("atom_to_term",
-				new Term[] { new Atom(text), new Variable("Term"), new Variable("NVdict") }));
-		q.open();
-		Map<String, Term> s = q.getSubstWithNameVars();
-		if (s != null) {
-			q.close();
-			return (Term) s.get("Term");
-		} else {
-			return null;
-		}
+		return Term.textToTerm(text);
 	}
 
 	/**

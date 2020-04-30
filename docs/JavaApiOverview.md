@@ -12,6 +12,10 @@ The ***API*** consists of the following class hierarchy:
 
 ```java
 org.jpl7
+ +-- fli
+ |    +-- Prolog
+ |    +-- engine_t
+ |    +-- ... <other support classes for fli>
  +-- JPL
  +-- JPLException
  |    +-- PrologException
@@ -21,42 +25,64 @@ org.jpl7
  |    +-- Compound
  |    +-- Float
  |    +-- Integer
+ |    +-- Rational
  |    +-- Variable
  |    +-- JRef
  +-- Util
  +-- Version
 ```
 
-`org.jpl7.Term` is an abstract class: only its subclasses can be instantiated.
+Configuration, initialization and inspection for JPL framework:
 
-Each instance of `org.jpl7.Query` contains a `Term` (denoting the goal which is to be proven), and much more besides.
+* `org.jpl7.fli` is the package for all the foreign language interface classes; those classes that use C Native library `libc.so` that links Java with the underlying SWI engine.
+    * `org.jpl7.Prolog` only of constants (static finals) and static _native_ methods. The constants and methods defined herein are in (almost) strict 1-1 correspondence with the functions in the Prolog FLI by the same name (except without the `PL_`, `SQ_`, etc. prefixes).
+    * `org.jpl7.engine_t` holds a reference to a Prolog engine.    
+* `org.jpl7.JPL` contains _static_ methods which allow _(i)_ inspection and alteration of the "default" initialisation arguments; _(ii)_ explicit initialisation; _(iii)_ discovery of whether the Prolog engine is already initialised, and if so, with what arguments. 
 
-Each instance of `org.jpl7.Compound` has a java.lang.String name and an array of `Term` arguments. For compatibility with SWI-Prolog version 7's extension [Compound terms with zero arguments](http://www.swi-prolog.org/pldoc/man?section=ext-compound-zero), the argument array can be of zero length.
+Using JPL for embeeding Prolog into Java, and vice-versa:
+
+* `org.jpl7.Term` is an abstract class accounting for the several type of Prolog terms: only its subclasses can be instantiated.
+    * Each instance of `org.jpl7.Compound` has a `java.lang.String` name and an array of `Term` arguments. For compatibility with SWI-Prolog version 7's extension [Compound terms with zero arguments](http://www.swi-prolog.org/pldoc/man?section=ext-compound-zero), the argument array can be of zero length.
+    * `org.jpl7.Term.JRef` is a has a (non-null, non-String) Object field, representing JPL 7.4's Prolog references to Java objects, e.g. `<jref>(0x01D8000)`. It is used to pass Java objects to Prolog from which Prolog can use the object (e.g., call methods on it), and obtain references to Java objects from Prolog.
+* `org.jpl7.Query` contains actual Prolog goals as a `Term`, and has various methods to run those goals and obtain results.
+* `org.jpl7.Util` provides various utilities, mostly related to management of Terms.
+
 
 ## Initializing and terminating Prolog
 
 Typically, this is automatic.
  
-JPL lazily initializes the Prolog VM, if necessary, when the first query is activated, using default initialization arguments (command line options). Before initialization takes place, these default values can be read, and altered.
+JPL lazily initializes the Prolog VM, if necessary, when the first query is activated, using default initialization arguments (command line options). Before initialization takes place, these default values can be read, and altered via the following two static methods in `org.jpl7.JPL`: 
 
 ```java
+// in org.jpl7.JPL
 public String[] getDefaultInitArgs();
 public void setDefaultInitArgs(String[] args);
 ```
+which effectively use the following native methods in `org.jpl7.JPL.Prolog`: 
 
-After initialization, the parameter values which were actually used can be read.
+```java
+// org.jpl7.JPL.Prolog
+public static native String[] get_default_init_args();
+public static native boolean set_default_init_args(String argv[]);
+```
+
+After initialization, the parameter values which were actually used can be read with the following method in in `org.jpl7.JPL`:
 
 ```java
 public String[] getActualInitArgs();
 ```
 
+which is effectively a call to native method ```Prolog.get_actual_init_args()```.
+
+
 This method returns `null` if initialization has not occurred, and thus it can be used as a test. This allows Java library classes to employ JPL without placing any burden of initialization upon the applications which use them. It can also ensure that the Prolog VM is initialized only if and when it is needed.
 
-Explicit initialization is supported:
+Explicit initialization is supported (in `org.jpl7.JPL`):
 
 ```java
-public void init();
-public void init(String args[]);
+public void init();     // call to Prolog.initialise()
+public void init(String args[]);    // configure and init()!
 ```
 
 Java code which requires a Prolog VM to be initialized in a particular way can check whether initialization has already occurred: if not, it can specify parameters and force it to be attempted; if so, it can retrieve and check the initialisation parameters actually used, to determine whether the initialization meets its requirements.
@@ -95,7 +121,7 @@ An atom's name is retrieved with its `name()` method, e.g.
 a1.name()
 ```
 
-See [org.jpl7.Atom JavaDoc](http://192.168.1.49:8080/jpl7/doc/org/jpl7/Atom.html) for details of how SWI Prolog version 7's strings and blobs (including reserved symbols) are accommodated.
+See [org.jpl7.Atom JavaDoc](https://jpl7.org/javadoc/org/jpl7/Atom.html) for details of how SWI Prolog version 7's strings and blobs (including reserved symbols) are accommodated.
 
 ### Variables
 
@@ -113,7 +139,7 @@ They are just tokens, and do not behave like Prolog variables.
 
 ### Integers
 
-A `org.jpl7.Integer` is a specialized `org.jpl7.Term` which holds a Java long value or a `java.math.BigInteger` object. This class corresponds to the Prolog *integer* type.
+A `org.jpl7.Integer` is a specialized `org.jpl7.Term` which holds a Java long value or a `java.math.BigInteger` object. This class corresponds to the Prolog *integer* [arithmethic type](https://www.swi-prolog.org/pldoc/man?section=artypes).
 
 ```java
 org.jpl7.Integer i = new org.jpl7.Integer(5);
@@ -125,9 +151,27 @@ The `org.jpl7.Integer` class has an `intValue()` accessor to obtain the `int` va
 
 If `isBig()` returns true, then the value is outside the range of a Java `long`, and is retrieved by `bigValue()`.
 
+### Rational
+
+A `org.jpl7.Rational` is a specialized `org.jpl7.Term` which holds two Java long values for numerator and denominator. This class corresponds to the Prolog [*rational* arithmetic type](https://www.swi-prolog.org/pldoc/man?section=rational).
+
+```java
+org.jpl7.Integer i = new org.jpl7.Rational(5, 2);
+```
+
+or from a String with the `<number>r<number` format:
+
+```java
+org.jpl7.Integer i = new org.jpl7.Rational("5r2");
+```
+
+The `org.jpl7.Rational` class has an `floatValue()` and `doubleValue()` methods, as well as `intValue()` that will perform Integer division (thus dropping the decimal part). It also provides getters ``getNumerator()`` and ``getDenominator()``.
+
+
+
 ### Floats
 
-A `org.jpl7.Float` is a specialized `org.jpl7.Term` which holds a Java `double` value. This class corresponds to the Prolog *float* type (64-bit ISO/IEC in SWI Prolog).
+A `org.jpl7.Float` is a specialized `org.jpl7.Term` which holds a Java `double` value. This class corresponds to the Prolog *float* [arithmethic type](https://www.swi-prolog.org/pldoc/man?section=artypes) (64-bit ISO/IEC in SWI Prolog).
 
 ```java
 org.jpl7.Float f = new org.jpl7.Float(3.14159265);
@@ -190,6 +234,34 @@ To obtain the *ith* argument of a compound (numbered from 0), use the **arg0()**
 ```java
 public Term arg0(int i);
 ```
+
+#### Lists as compound terms
+
+As usual in Prolog, lists are just compound terms with function `[|]` and two arguments: the _head_ element and the _tail_ list. For example:
+
+```prolog
+?- A = [1,2,3,4], A =.. [X|Y].
+A = [1, 2, 3, 4],
+X = '[|]',
+Y = [1, [2, 3, 4]].
+````
+
+We can build list compound terms in two ways. First, by converting an Array of terms (`Term[]`) into a Compound (list) term using utility `Util.termArrayToList`:
+
+```java
+Term list = Util.termArrayToList(new Term[] 
+        { new Integer(1), new Variable("B"), new Atom("c") });
+```        
+
+The second way is by converting a String representing a list into a term via `Util.textToTerm`:
+
+```java
+Term list = Util.textToTerm("[1, B, c]");
+```
+
+
+
+
 
 ## Creating queries
 

@@ -3,12 +3,13 @@ project(swipl-jpl-jar)
 
 find_package(Java COMPONENTS Development)
 include(UseJava)
-include(JUnit)
+include(JUnit) # junit4.jar
 
 set(CLS	org/jpl7/Atom.java
 	org/jpl7/Compound.java
 	org/jpl7/Float.java
 	org/jpl7/Integer.java
+	org/jpl7/Rational.java
 	org/jpl7/JRef.java
 	org/jpl7/JPLException.java
 	org/jpl7/JPL.java
@@ -37,20 +38,40 @@ set(FLI	org/jpl7/fli/atom_t.java
 	org/jpl7/fli/StringHolder.java
 	org/jpl7/fli/term_t.java)
 
-set(TEST org/jpl7/test/Family.java
-	org/jpl7/test/FetchBigTree.java
-	org/jpl7/test/FetchLongList.java
-	org/jpl7/test/Ga2.java
-	org/jpl7/test/Ga.java
-	org/jpl7/test/Garbo.java
-	org/jpl7/test/Masstest.java
-	org/jpl7/test/MaxObjects.java
-	org/jpl7/test/ShadowA.java
-	org/jpl7/test/ShadowB.java
-	org/jpl7/test/SyntaxError.java
-	org/jpl7/test/Test.java
-	org/jpl7/test/TestJUnit.java
-	org/jpl7/test/TestOLD.java)
+set(TEST
+    org/jpl7/test/standalone/SyntaxError.java
+    org/jpl7/test/standalone/Masstest.java
+    org/jpl7/test/standalone/Garbo.java
+    org/jpl7/test/standalone/FetchBigTree.java
+    org/jpl7/test/standalone/Versions.java
+    org/jpl7/test/standalone/CelsiusConverter.java
+    org/jpl7/test/standalone/Ga.java
+    org/jpl7/test/standalone/Ga2.java
+    org/jpl7/test/standalone/FetchLongList.java
+    org/jpl7/test/standalone/Family.java
+    ##
+    org/jpl7/test/junit/Tests.java
+    org/jpl7/test/junit/GetSolution.java
+    org/jpl7/test/junit/QueryBuilder.java
+    org/jpl7/test/junit/RationalTest.java
+    org/jpl7/test/junit/Variables.java
+    org/jpl7/test/junit/MutualRecursion.java
+    org/jpl7/test/junit/AtomTest.java
+    org/jpl7/test/junit/Unicode.java
+    org/jpl7/test/junit/ReportPrologInfo.java
+    org/jpl7/test/junit/JRef.java
+    org/jpl7/test/junit/DataManagement.java
+    org/jpl7/test/junit/TypesTest.java
+    org/jpl7/test/junit/ListTest.java
+    org/jpl7/test/junit/IntegerTest.java
+    org/jpl7/test/junit/StringTest.java
+    org/jpl7/test/junit/ModuleTest.java
+    ##
+    org/jpl7/test/JPLTestSuiteRunner.java
+    org/jpl7/test/JPLTestSuite.java
+    org/jpl7/test/ShadowA.java
+    org/jpl7/test/ShadowB.java
+    org/jpl7/test/Test.java)
 
 option(JAVA_COMPATIBILITY
        "Make jpl.jar compatible with older Java versions"

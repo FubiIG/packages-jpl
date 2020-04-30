@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 project(swipl-jpl)
 
+
+#message(${CMAKE_CURRENT_SOURCE_DIR}) # <project>/packages/jpl
+#message(${PROJECT_SOURCE_DIR})  # <project>/packages/jpl
+#message(${PROJECT_BINARY_DIR})  # build/packages/jpl
+
+
 include("../cmake/PrologPackage.cmake")
 include(Install)
 
@@ -49,7 +55,7 @@ endif(NOT ANDROID)
 find_package(Java COMPONENTS Development)
 
 if(JNI_FOUND AND Java_FOUND)
-include(JUnit)
+    include(JUnit)  # load module defined in cmake/JUnit.cmake
 
 add_subdirectory(src/java)
 
@@ -88,9 +94,9 @@ swipl_plugin(
     PL_LIBS jpl.pl ${JPLCONFIG})
 
 if(JNIDIR)
-install(DIRECTORY DESTINATION ${JNIDIR})
-ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_LIB}/${jpl_module}${JPLEXT}
-      ${JNIDIR}/${jpl_module}${JPLEXT})
+    install(DIRECTORY DESTINATION ${JNIDIR})
+    ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_LIB}/${jpl_module}${JPLEXT}
+          ${JNIDIR}/${jpl_module}${JPLEXT})
 endif()
 
 # Debian policies do not want  RPATH/RUNPATH.   This  clears the RUNPATH
@@ -116,32 +122,37 @@ add_dependencies(jpl libjpl jpl_jar)
 # cycle to get everything in place
 
 set(swihome ../../home)
+#set(swihome ${PROJECT_BINARY_DIR}/../../home)
 if(JUNIT_JAR)
-  set(swibootfile ${swihome}/boot.prc)
-
-add_test(
-    NAME jpl:prolog_in_java
-    COMMAND env SWI_HOME_DIR=${swihome}
-		SWIPL_BOOT_FILE=${swibootfile}
-                TEST_JPL=../../../packages/jpl/test_jpl.pl
-	    ${Java_JAVA_EXECUTABLE}
-		 -Djava.library.path=.
-                 -classpath ${JUNIT_JAR}:src/java/jpl.jar:src/java/jpltest.jar
-                 junit.textui.TestRunner org.jpl7.test.TestJUnit)
+    set(swibootfile ${swihome}/boot.prc)
 
 
-test_lib(jpl
-	 NAME java_in_prolog
-	 PACKAGES plunit)
+    # Add testing pack on Java code calling Prolog (class org.jpl7.test.junit.TestJUnit4)
+    add_test(
+        NAME jpl:prolog_in_java
+        COMMAND env
+            CLASSPATH=src/java/jpl.jar
+            SWI_HOME_DIR=${swihome}
+            SWIPL_BOOT_FILE=${swibootfile}
+            SOURCE_DIR=${PROJECT_SOURCE_DIR}
+            ${Java_JAVA_EXECUTABLE}
+             -Djava.library.path=.
+                     -classpath ${JUNIT_JAR}:${HAMCREST}:src/java/jpl.jar:src/java/jpltest.jar
+                     org.jpl7.test.JPLTestSuiteRunner)
 
-if(INSTALL_TESTS)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/java/jpltest.jar
-	  DESTINATION ${INSTALL_TESTS_DIR}/packages/jpl/src/java
-	  COMPONENT Tests)
-endif()
 
+    # Add testing pack on Prolog code calling Java
+    test_lib(jpl
+         NAME java_in_prolog
+         PACKAGES plunit)
+
+    if(INSTALL_TESTS)
+      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/java/jpltest.jar
+          DESTINATION ${INSTALL_TESTS_DIR}/packages/jpl/src/java
+          COMPONENT Tests)
+    endif()
 else(JUNIT_JAR)
-  message("-- No junit.jar.  Dropping JPL tests.")
+  message("-- No junit.jar. Make sure junit.jar points to junit4.jar  Dropping JPL tests.")
 endif(JUNIT_JAR)
 
 ################
