@@ -14,10 +14,9 @@
     <!-- ##################################################################
 		PROJECT INFO
      ####################################################################### -->
-    <groupId>com.github.ssardina-research</groupId>
+    <groupId>com.github.SWI-Prolog</groupId>
     <artifactId>packages-jpl</artifactId>
-    <version>8.1.1-ssardina</version>
-    <!--<version>ssardina-devel</version>-->
+    <version>7.5.0</version>
     <packaging>jar</packaging>
     
     <name>jpl</name>
@@ -62,6 +61,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4jVersion>1.7.25</slf4jVersion>
         <skipTests>true</skipTests>
+
+<!--        <jar.finalName>jpl-${version}</jar.finalName>-->
     </properties>
     
     <!--<prerequisites>-->
@@ -122,8 +123,26 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <excludes>
+                        <exclude>org/jpl7/test/</exclude>
+                        <exclude>org/jpl7/util/</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.0.1</version>
+                <configuration>
+                    <excludes>
+                        <exclude>org/jpl7/test/</exclude>
+                        <exclude>org/jpl7/util/</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -138,7 +157,13 @@
                 <!-- JAVADOC generation plugin -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <!--<version>2.9</version>-->
+                <version>3.1.1</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <source>7</source>
+
+                    <excludePackageNames>org.jpl7.util;org.jpl7.test;org.jpl7.test.*</excludePackageNames>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
