@@ -8,15 +8,16 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Integer is a specialised Term representing a Prolog integer value; if the value fits, it is held in a long field,
- * else as a BigInteger.
+ * Rational is a specialised Term representing a Prolog rational number, stored in canonical form.
+ * In SWIPL: https://www.swi-prolog.org/pldoc/man?section=rational
  *
  * <pre>
- * Integer i = new Integer(1024);
+ * Rational r1 = new Rational(2, 3);	// for rational 2/3
+ * Rational r2 = new Rational(4, 6);	// for rational 2/3
+ * Rational r3 = new Rational("2r3");	// for rational 2/3
  * </pre>
  *
- * Once constructed, the value of an Integer instance cannot be altered. An Integer can be used (and re-used) as an
- * argument of Compounds. Beware confusing jpl.Integer with java.lang.Integer.
+ * Once constructed, the value of an Rational instance cannot be altered.
  *
  * <hr>
  * Copyright (C) 2004 Paul Singleton
@@ -45,7 +46,6 @@ import java.util.regex.Pattern;
  * <hr>
  *
  * @see Term
- * @see Compound
  */
 public class Rational extends Term {
 
